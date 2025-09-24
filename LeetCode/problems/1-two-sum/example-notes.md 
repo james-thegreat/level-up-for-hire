@@ -1,0 +1,33 @@
+------------------------------Warning---------------------------------------
+----This is just an Example of how im going to structure my notes-----------
+
+# Problem: Two Sum
+
+**Problem Statement:**
+Given an array of integers `nums` and an integer `target`, return the indices of the two numbers that add up to `target`. You may assume that each input would have exactly one solution, and you may not use the same element twice.
+
+**1. My Initial Thoughts (Day 1 - Brute Force):**
+*   How can I check every possible combination of numbers?
+*   I can use nested loops. The outer loop iterates from the first element, and the inner loop iterates from the next element.
+*   For each pair `(nums[i], nums[j])`, check if their sum equals the `target`.
+*   This seems straightforward but inefficient. The time complexity will be $O(n^2)$. I'll write this down first to get a working solution.
+
+**2. Optimizing the Approach (Day 2 - Hash Map):**
+*   The brute-force method is slow because we are re-checking sums. How can I speed up the lookup process?
+*   Instead of nested loops, can I find the *complement* of a number faster? The complement is `target - nums[i]`.
+*   A hash map (or dictionary in Python) provides average $O(1)$ lookup time.
+*   The strategy: Iterate through the array once. For each number `num`, calculate its `complement`. Check if the `complement` exists in the hash map.
+*   If it exists, I've found my pair. The indices are the current index `i` and the index stored for the `complement` in the hash map.
+*   If the `complement` doesn't exist, add the current number and its index to the hash map for future lookups.
+
+**3. Complexity Analysis:**
+*   **Brute Force:**
+    *   Time: $O(n^2)$ due to nested loops.
+    *   Space: $O(1)$ since we are not using any extra data structures.
+*   **Optimized (Hash Map):**
+    *   Time: $O(n)$ because we only iterate through the array once. The hash map operations (insertion and lookup) are on average $O(1)$.
+    *   Space: $O(n)$ in the worst case, as the hash map could store up to $n$ elements.
+
+**4. Key Learning/Pattern:**
+*   This problem is a classic example of using a hash map to trade space for a faster time complexity. When you need to find if a complement or related value exists within a collection, consider using a hash map for efficient lookups.
+
