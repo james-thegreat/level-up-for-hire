@@ -1,0 +1,20 @@
+### `1-two-sum/test-cases.txt`
+
+This file is a simple list of test cases, each on a new line. You can manually copy and paste these into your LeetCode solution or use a script to run them locally. For this simple problem, a plain text file is sufficient.
+
+```text
+# Example 1: Basic case
+nums = [2,7,11,15], target = 9
+Expected = [0,1]
+
+# Example 2: Negative numbers
+nums = [3,-1,5,10], target = 2
+Expected = [1,3]
+
+# Example 3: Different order
+nums = [3,2,4], target = 6
+Expected = [1,2]
+
+# Example 4: Edge case (smallest array)
+nums = [3,3], target = 6
+Expected = [0,1]
