@@ -17,5 +17,5 @@
 ## Goal 
 <p>
   - Try to focuse on one leet code a day.
-  - 
+  - Commit at lest twice a day to GitHub. 
 </p>
