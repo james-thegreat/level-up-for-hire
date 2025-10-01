@@ -13,3 +13,9 @@
   <li>Leet Code</li>
   <li>GitHub</li>
 </ul>
+
+## Goal 
+<p>
+  - Try to focuse on one leet code a day.
+  - 
+</p>
