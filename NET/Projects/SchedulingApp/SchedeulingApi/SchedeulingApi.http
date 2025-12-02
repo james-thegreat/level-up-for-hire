@@ -1,0 +1,6 @@
+@SchedeulingApi_HostAddress = http://localhost:5144
+
+GET {{SchedeulingApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
