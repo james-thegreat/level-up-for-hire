@@ -1,7 +1,4 @@
-// src/api.js
-
-// IMPORTANT: use http and the exact port from dotnet run
-const API_BASE_URL = "http://localhost:5144/api";
+const API_BASE_URL = "http://localhost:5144/api"; // same as before
 
 export async function fetchAppointments() {
   const res = await fetch(`${API_BASE_URL}/appointments`);
@@ -34,4 +31,40 @@ export async function createAppointment(appointment) {
   }
 
   return JSON.parse(text);
+}
+
+// NEW: update an appointment
+export async function updateAppointment(id, appointment) {
+  const res = await fetch(`${API_BASE_URL}/appointments/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(appointment),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    console.error("Update failed:", res.status, text);
+    throw new Error(
+      text || `Failed to update appointment (status ${res.status})`
+    );
+  }
+
+  // PUT returns 204 NoContent in our API, so nothing to parse
+}
+
+// NEW: delete an appointment
+export async function deleteAppointment(id) {
+  const res = await fetch(`${API_BASE_URL}/appointments/${id}`, {
+    method: "DELETE",
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    console.error("Delete failed:", res.status, text);
+    throw new Error(
+      text || `Failed to delete appointment (status ${res.status})`
+    );
+  }
 }

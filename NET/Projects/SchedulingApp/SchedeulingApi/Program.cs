@@ -1,4 +1,4 @@
-using SchedeulingApi.Services; // or SchedulingApi.Services depending on your namespace
+using SchedulingApi.Services; // or SchedulingApi.Services depending on your namespace
 
 var builder = WebApplication.CreateBuilder(args);
 
