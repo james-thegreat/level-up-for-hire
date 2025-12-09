@@ -38,9 +38,6 @@ function App() {
 
   const [editingId, setEditingId] = useState(null);
 
-  // NEW: track which appointment is selected for the side panel
-  const [selectedAppointment, setSelectedAppointment] = useState(null);
-
   // Calendar state: current month being viewed
   const [currentMonth, setCurrentMonth] = useState(() => {
     const now = new Date();
@@ -97,12 +94,6 @@ function App() {
               : a
           )
         );
-        // also update selected panel if it’s the same
-        setSelectedAppointment((prev) =>
-          prev && prev.id === editingId
-            ? { ...prev, title: payload.title, startTime: payload.startTime }
-            : prev
-        );
       }
       resetForm();
     } catch (err) {
@@ -116,7 +107,6 @@ function App() {
     setEditingId(appointment.id);
     setTitle(appointment.title);
     setStartTime(toDatetimeLocalString(appointment.startTime));
-    setSelectedAppointment(appointment); // keep side panel in sync
   };
 
   const handleCancelEdit = () => {
@@ -128,25 +118,13 @@ function App() {
     try {
       await deleteAppointment(id);
       setAppointments((prev) => prev.filter((a) => a.id !== id));
-
-      // If we were editing or viewing this one, clear state
       if (editingId === id) {
         resetForm();
       }
-      setSelectedAppointment((prev) => (prev && prev.id === id ? null : prev));
     } catch (err) {
       console.error(err);
       setError(err.message || "Failed to delete appointment.");
     }
-  };
-
-  // NEW: when you click an event in the calendar
-  const handleSelectAppointment = (appointment) => {
-    setSelectedAppointment(appointment);
-  };
-
-  const handleClosePanel = () => {
-    setSelectedAppointment(null);
   };
 
   const goToPrevMonth = () => {
@@ -236,7 +214,7 @@ function App() {
               Scheduling App
             </h1>
             <p className="text-sm text-slate-600">
-              Full-stack C# + React calendar with Tailwind and a side panel.
+              Full-stack C# + React calendar with Tailwind.
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -320,166 +298,103 @@ function App() {
           </div>
         </section>
 
-        {/* Calendar + Side Panel layout */}
-        <section className="grid gap-4 lg:grid-cols-[2fr,minmax(260px,320px)]">
-          {/* Calendar */}
-          <div className="rounded-xl bg-white shadow-md shadow-slate-200/60 p-4 sm:p-5">
-            <div className="grid grid-cols-7 gap-px bg-slate-200 rounded-lg overflow-hidden text-xs font-medium text-slate-600 mb-1">
-              {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
-                <div
-                  key={d}
-                  className="bg-slate-50 py-2 text-center uppercase tracking-wide"
-                >
-                  {d}
-                </div>
-              ))}
-            </div>
+        {/* Calendar */}
+        <section className="rounded-xl bg-white shadow-md shadow-slate-200/60 p-4 sm:p-5">
+          <div className="grid grid-cols-7 gap-px bg-slate-200 rounded-lg overflow-hidden text-xs font-medium text-slate-600 mb-1">
+            {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
+              <div
+                key={d}
+                className="bg-slate-50 py-2 text-center uppercase tracking-wide"
+              >
+                {d}
+              </div>
+            ))}
+          </div>
 
-            <div className="grid grid-cols-7 gap-px bg-slate-200 rounded-lg overflow-hidden">
-              {calendarCells.map((cell) => {
-                if (cell.type === "empty") {
-                  return (
-                    <div key={cell.key} className="bg-slate-50 h-20 sm:h-28" />
-                  );
-                }
-
-                const dateKey = toLocalDateKey(cell.date);
-                const dayAppointments = appointmentsByDate[dateKey] || [];
-
-                const isToday = toLocalDateKey(new Date()) === dateKey;
-
+          <div className="grid grid-cols-7 gap-px bg-slate-200 rounded-lg overflow-hidden">
+            {calendarCells.map((cell) => {
+              if (cell.type === "empty") {
                 return (
                   <div
                     key={cell.key}
-                    className="bg-white h-24 sm:h-32 p-1.5 flex flex-col border border-slate-100"
-                  >
-                    <div className="flex items-center justify-between mb-1">
-                      <span
-                        className={`text-xs font-semibold ${
-                          isToday ? "text-sky-600" : "text-slate-700"
-                        }`}
-                      >
-                        {cell.date.getDate()}
-                      </span>
-                      {isToday && (
-                        <span className="inline-flex items-center rounded-full bg-sky-100 px-2 py-0.5 text-[10px] font-semibold text-sky-700">
-                          Today
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex-1 overflow-y-auto space-y-1">
-                      {dayAppointments.length === 0 ? (
-                        <span className="block text-[11px] text-slate-400">
-                          No events
-                        </span>
-                      ) : (
-                        dayAppointments.map((a) => (
-                          <div
-                            key={a.id}
-                            className="group rounded-md border border-sky-100 bg-sky-50 px-1.5 py-1 text-[11px] text-slate-800 flex flex-col gap-0.5 cursor-pointer hover:bg-sky-100"
-                            onClick={() => handleSelectAppointment(a)}
-                          >
-                            <div className="flex justify-between items-center gap-1">
-                              <span className="font-semibold truncate">
-                                {a.title}
-                              </span>
-                              <span className="text-[10px] text-slate-500 whitespace-nowrap">
-                                {new Date(a.startTime).toLocaleTimeString(
-                                  undefined,
-                                  {
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                  }
-                                )}
-                              </span>
-                            </div>
-                            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <button
-                                type="button"
-                                className="rounded-sm bg-white border border-sky-200 px-1 text-[10px] text-sky-700 hover:bg-sky-50"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleEditClick(a);
-                                }}
-                              >
-                                Edit
-                              </button>
-                              <button
-                                type="button"
-                                className="rounded-sm bg-white border border-rose-200 px-1 text-[10px] text-rose-700 hover:bg-rose-50"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleDeleteClick(a.id);
-                                }}
-                              >
-                                Delete
-                              </button>
-                            </div>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  </div>
+                    className="bg-slate-50 h-20 sm:h-28"
+                  />
                 );
-              })}
-            </div>
-          </div>
+              }
 
-          {/* Side Panel */}
-          <div className="rounded-xl bg-white shadow-md shadow-slate-200/60 p-4 sm:p-5 min-h-[160px]">
-            <h2 className="text-lg font-semibold text-slate-900 mb-3">
-              Appointment Details
-            </h2>
+              const dateKey = toLocalDateKey(cell.date);
+              const dayAppointments = appointmentsByDate[dateKey] || [];
 
-            {!selectedAppointment ? (
-              <p className="text-sm text-slate-500">
-                Select an appointment in the calendar to view its details here.
-              </p>
-            ) : (
-              <div className="space-y-3">
-                <div>
-                  <h3 className="text-base font-semibold text-slate-900">
-                    {selectedAppointment.title}
-                  </h3>
-                  <p className="text-sm text-slate-600">
-                    {new Date(
-                      selectedAppointment.startTime
-                    ).toLocaleString(undefined, {
-                      weekday: "long",
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </p>
+              const isToday =
+                toLocalDateKey(new Date()) === dateKey;
+
+              return (
+                <div
+                  key={cell.key}
+                  className="bg-white h-24 sm:h-32 p-1.5 flex flex-col border border-slate-100"
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span
+                      className={`text-xs font-semibold ${
+                        isToday ? "text-sky-600" : "text-slate-700"
+                      }`}
+                    >
+                      {cell.date.getDate()}
+                    </span>
+                    {isToday && (
+                      <span className="inline-flex items-center rounded-full bg-sky-100 px-2 py-0.5 text-[10px] font-semibold text-sky-700">
+                        Today
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex-1 overflow-y-auto space-y-1">
+                    {dayAppointments.length === 0 ? (
+                      <span className="block text-[11px] text-slate-400">
+                        No events
+                      </span>
+                    ) : (
+                      dayAppointments.map((a) => (
+                        <div
+                          key={a.id}
+                          className="group rounded-md border border-sky-100 bg-sky-50 px-1.5 py-1 text-[11px] text-slate-800 flex flex-col gap-0.5"
+                        >
+                          <div className="flex justify-between items-center gap-1">
+                            <span className="font-semibold truncate">
+                              {a.title}
+                            </span>
+                            <span className="text-[10px] text-slate-500 whitespace-nowrap">
+                              {new Date(a.startTime).toLocaleTimeString(
+                                undefined,
+                                {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                }
+                              )}
+                            </span>
+                          </div>
+                          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button
+                              type="button"
+                              className="rounded-sm bg-white border border-sky-200 px-1 text-[10px] text-sky-700 hover:bg-sky-50"
+                              onClick={() => handleEditClick(a)}
+                            >
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              className="rounded-sm bg-white border border-rose-200 px-1 text-[10px] text-rose-700 hover:bg-rose-50"
+                              onClick={() => handleDeleteClick(a.id)}
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
                 </div>
-
-                <div className="border-t border-slate-200 pt-3 flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    onClick={() => handleEditClick(selectedAppointment)}
-                    className="rounded-md bg-sky-600 px-3 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-sky-700"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDeleteClick(selectedAppointment.id)}
-                    className="rounded-md bg-rose-600 px-3 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-rose-700"
-                  >
-                    Delete
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleClosePanel}
-                    className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
-                  >
-                    Close
-                  </button>
-                </div>
-              </div>
-            )}
+              );
+            })}
           </div>
         </section>
       </div>

@@ -1,14 +1,14 @@
-using SchedulingApi.Services; // or SchedulingApi.Services depending on your namespace
+using SchedulingApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add controllers
+// Adds controller support
 builder.Services.AddControllers();
 
-// Register your AppointmentService
+// Registers AppointmentService so it can be injected into controllers
 builder.Services.AddSingleton<AppointmentService>();
 
-// CORS: allow the React app origin
+// CORS so React (on localhost:5173 / 5174) can talk to this API
 var corsPolicyName = "AllowReactApp";
 
 builder.Services.AddCors(options =>
@@ -16,7 +16,10 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: corsPolicyName, policy =>
     {
         policy
-            .WithOrigins("http://localhost:5173") // <- change if Vite uses a different port
+            .WithOrigins(
+                "http://localhost:5173",
+                "http://localhost:5174"   // Vite switched to this
+            )
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
@@ -24,12 +27,15 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+// Enable CORS
 app.UseCors(corsPolicyName);
 
-app.UseHttpsRedirection(); // still fine even if you're only using http
+// ❌ Turn OFF HTTPS redirection for local dev
+// app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
+// Maps controller routes like /api/appointments
 app.MapControllers();
 
 app.Run();
