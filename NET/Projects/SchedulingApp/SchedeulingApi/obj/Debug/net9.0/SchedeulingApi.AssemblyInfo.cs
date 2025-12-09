@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SchedeulingApi")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c23d943c5bb427df53c7813e1de64cb944adfada")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7bf8d07415aa358aa840342b6f4ae7d7c13a2504")]
 [assembly: System.Reflection.AssemblyProductAttribute("SchedeulingApi")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SchedeulingApi")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
