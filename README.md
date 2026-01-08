@@ -24,5 +24,6 @@
 <p>
   C#
   <li>Practusing problems to get my head around C#'s syntax.</li>
+  API
   <li>Creating a schedule app to practice API.</li>
 </p>
