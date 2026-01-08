@@ -12,6 +12,7 @@ class Program
         int [] numbers = { 1, 2, 3, 4 };
         int sum = 0;
 
+        System.Console.WriteLine("Sum of an Array");
         for (int i = 0; i < numbers.Length; i ++)
         {
             sum = sum + numbers[i];
@@ -26,6 +27,7 @@ class Program
 
         int largest = 0;
 
+        System.Console.WriteLine("Find the Largest Number");
         for (int j = 0; j < number.Length; j++){
 
             if (number[j] > largest)
@@ -42,7 +44,7 @@ class Program
         int even = 0;
         int odd = 0;
 
-
+        System.Console.WriteLine("Count Even & Odd Numbbers");
         for (int k = 0; k < num.Length; k++)
         {
             if (k % 2 == 0)
@@ -62,6 +64,7 @@ class Program
         // 4 Grade Calculator ------------------------
         int score =  82;
 
+        System.Console.WriteLine("Grade Calculator");
         if (score < 100 && score >= 90 )
         {
             Console.WriteLine("Congrdulations you got a A");
@@ -90,6 +93,7 @@ class Program
         // 5 reverse an Array ------------------------
         int[] nums = { 1, 2, 3, 4 };
 
+        System.Console.WriteLine("\nReverse an Array");
         for (int f = nums.Length - 1; f >= 0; f--)
         {
             Console.WriteLine(nums[f]);
@@ -100,6 +104,7 @@ class Program
         int [] numz = { 5, 8, 2, 9 };
         int target = 8;
 
+        System.Console.WriteLine("\nStore History of Results");
         for (int z = 0;  z < numz.Length; z++)
         {
             if (target == numz[z])
@@ -120,7 +125,7 @@ class Program
         System.Console.WriteLine(random);
 
 
-
+        System.Console.WriteLine("\nSimple Guessing Game");
         while (random != guess)
         {
             guess = Convert.ToInt32(Console.ReadLine());
@@ -133,6 +138,73 @@ class Program
                 System.Console.WriteLine("Incorect try again.");
              }
         }
+        // -------------------------------------------
+
+        // #--------------Intermaedite --------------#
+
+        // 1 Frequency Counter -----------------------
+        int []fre = { 1, 2, 2, 3, 1, 4, 2 };
+        int [] appears = { 0, 0, 0, 0 };
+
+        for (int i = 0; i < fre.Length; i++)
+        {
+            if (fre[i] == 1)
+            {
+                appears[0] += 1;
+            }
+            else if (fre[i] == 2)
+            {
+                appears[1] += 1;
+            }
+            else if (fre[i] == 3)
+            {
+                appears [2] += 1;
+            }
+            else if (fre[i] == 4)
+            {
+                appears[3] += 1;
+            }
+        }
+
+        System.Console.WriteLine("\nFrequency Counter");
+        int count = 1;
+        int countNum = 0;
+        for (int i = 0; i < appears.Length; i++)
+        {
+            if (appears[i] == 1)
+            {
+            System.Console.WriteLine(count + " appears " + appears[countNum] + " time");
+                
+            }
+            else
+            {
+            System.Console.WriteLine(count + " appears " + appears[countNum] + " times");
+            }
+            count++;
+            countNum++;
+        }
+        // -------------------------------------------
+
+        // 2 Second Largest Number -------------------
+        int[] numSet = { 10, 5, 8, 20, 15 };
+        int secondLargestNumber = 0;
+        int largestNumber = 0;
+
+        System.Console.WriteLine("\nSecond Largest Number");
+        for (int i = 0; i < numSet.Length; i++)
+        {
+            if (numSet[i] < largestNumber)
+            {
+                largestNumber = numSet[i];
+            }
+            else if (numSet[i] > largestNumber)
+            {
+                secondLargestNumber = numSet[i];
+            }
+        }
+
+        System.Console.WriteLine("Second largest " + secondLargestNumber);
+
         // -------------------------------------------
     }
 }
