@@ -19,3 +19,10 @@
   - Try to focuse on one leet code a day.
   - Commit at lest twice a day to GitHub. 
 </p>
+
+<h3>.NET</h3>
+<p>
+  C#
+  - Practusing problems to get my head around C#'s syntax.
+  - Creating a schedule app to practice API.
+</p>
