@@ -20,7 +20,7 @@
   <li>Commit at lest twice a day to GitHub.</li>
 </p>
 
-<h3>.NET</h3>
+##.NET
 <p>
   C#
   <li>Practusing problems to get my head around C#'s syntax.</li>
