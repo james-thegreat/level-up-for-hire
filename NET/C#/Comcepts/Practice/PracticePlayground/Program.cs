@@ -364,6 +364,36 @@ class Program
         }
         // -------------------------------------------
 
+        // 13 Word Counter ---------------------------
+        static void WordCounter()
+        {
+            System.Console.WriteLine("Enter a Centance: ");
+            string input = Console.ReadLine();
+
+            string[] words = input.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+            System.Console.WriteLine($"Word count: {words.Length}");
+        }
+        // -------------------------------------------
+
+        // 14 Find the Missing Number ----------------
+        static void FindMissingNumber()
+        {
+            int[] number = { 1, 2, 4, 5 };
+
+            int n = number.Length + 1;
+            int expectedSum = n * (n + 1) / 2;
+
+            int actualSum = 0;
+            foreach (int i in number)
+            {
+                actualSum += number;
+            }
+
+            System.Console.WriteLine($"Missing number = {expectedSum - actualSum}");
+
+        }
+        // -------------------------------------------
 
         // =============== Main Menu =================
         bool running = true;
@@ -425,6 +455,10 @@ class Program
                 case "12":
                     BankingSysyem();
                     break;
+
+                case "13":
+                    WordCounter();
+                    break;
                 
                 default:
                 System.Console.WriteLine("Invalid option.");
@@ -450,7 +484,7 @@ class Program
             System.Console.WriteLine("10. ValidatePin");
             System.Console.WriteLine("11. RemoveDuplicates");
             System.Console.WriteLine("12. BankingSysyem");
-            System.Console.WriteLine("");
+            System.Console.WriteLine("13. WordCounter");
             System.Console.WriteLine("");
             System.Console.WriteLine("");
         }
