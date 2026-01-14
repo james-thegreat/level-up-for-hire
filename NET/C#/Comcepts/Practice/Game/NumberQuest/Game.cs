@@ -1,55 +1,64 @@
-namespace GameLogic;
+using System;
 public class Game
 {
-    static Random random = new Random();
-    public static void PlayGame()
-    {
-        int level = 1;
-        int score = 0;
-        bool playing = true;
+    private Random random;
+    private Player player;
 
-        int attempts;
-        int difficultyMultiplier = ChooseDifficulty(out attempts);
+    private int difficultyMultiplier;
+    private int attempts;
+
+    public Game()
+    {
+        player = new Player();
+        random = new Random();
+        ChooseDifficulty();
+    }
+
+    public void Start()
+    {
+        bool playing = true;
 
         while (playing)
         {
-            Console.Clear();
-            System.Console.WriteLine($"=== LEVEL {level} ===");
 
-            int maxNumber = level * difficultyMultiplier;
+            Console.Clear();
+            System.Console.WriteLine($"=== LEVEL {player.Level}");
+        
+            int maxNumber = player.Level * difficultyMultiplier;
             int secretNumber = random.Next(1, maxNumber + 1);
 
-            bool won = PlayLevel(secretNumber, maxNumber, attempts);
+            bool won = PlayLevel(secretNumber, maxNumber);
 
             if (won)
             {
-                score += level * 10;
-                level++;
+                player.AddScore(player.Level * 10);
+                player.LevelUp();
 
-                System.Console.WriteLine("Level Complet!");
-                System.Console.WriteLine($"Score: {score}");
-                System.Console.WriteLine($"Difficulty Multiplier: {difficultyMultiplier}");
-                System.Console.WriteLine("Progress any key to continue...");
+                System.Console.WriteLine("\nLevel Complete!");
+                System.Console.WriteLine($"Score: {player.Score}");
+                System.Console.WriteLine("Press any key to continue...");
                 Console.ReadKey();
             }
             else
             {
-                System.Console.WriteLine("\n Game Over!");
-                System.Console.WriteLine($"You reached  level {level}");
-                System.Console.WriteLine($"Difficulty Multiplier: {difficultyMultiplier}");
-                System.Console.WriteLine($"Final score: {score}");
+                System.Console.WriteLine("\nGame Over!");
+                System.Console.WriteLine($"Score: {player.Score}");
+                System.Console.WriteLine("Press any key to continue...");
                 playing = false;
             }
         }
     }
 
-    static bool PlayLevel(int secretNumber, int maxNumber, int attempts)
+    private bool PlayLevel(int secretNumber, int maxNumber)
     {
-        while (attempts > 0)
+        int remainingAttempts = attempts;
+
+        while (remainingAttempts > 0)
         {
-            System.Console.WriteLine($"\nGuess the number(1 - {maxNumber})");
-            System.Console.WriteLine($"Attempts left: {attempts}");
-            int guess = GetValidInt("Your guess: ");
+            System.Console.WriteLine($"\nGuess the number (1 - {maxNumber})");
+            System.Console.WriteLine($"Attempts left: {remainingAttempts}");
+
+            int guess = InputHelper.GetValidInt("Your guess: ");
 
             if (guess == secretNumber)
             {
@@ -61,63 +70,46 @@ public class Game
             }
             else
             {
-                System.Console.WriteLine("Too high!");
+                System.Console.WriteLine("Too hight!");
             }
 
-            attempts--;
+            remainingAttempts--;
         }
 
-        System.Console.WriteLine($"\nThe correct number was {secretNumber}");
+        System.Console.WriteLine($"The correct number was {secretNumber}");
         return false;
     }
 
-    static int GetValidInt(string message)
-    {
-        int value;
-        bool success;
-
-        do
-        {
-            Console.Write(message);
-            success = int.TryParse(Console.ReadLine(), out value);
-            if (!success)
-            {
-                System.Console.WriteLine("Invalid number, Try again.");
-            }
-
-        } while (!success);
-
-        return value;
-    }
-
-    static int ChooseDifficulty(out int attempts)
+    private void ChooseDifficulty()
     {
         Console.Clear();
-        Console.WriteLine("Choose Difficulty: ");
-        Console.WriteLine("1. Easy");
-        Console.WriteLine("2. Medium");
-        Console.WriteLine("3, Hard");
+        System.Console.WriteLine("Choose Difficulty: ");
+        System.Console.WriteLine("1. Easy");
+        System.Console.WriteLine("2. Medium");
+        System.Console.WriteLine("3. Hard");
 
-        int choice = GetValidInt("Your choice: ");
+        int choice = InputHelper.GetValidInt("Choice: ");
 
         switch (choice)
         {
             case 1:
+                difficultyMultiplier = 5;
                 attempts = 7;
-                return 5;
-                
+                break;
+
             case 2:
+                difficultyMultiplier = 10;
                 attempts = 5;
-                return 10;
+                break;
 
             case 3:
+                difficultyMultiplier = 20;
                 attempts = 3;
-                return 20;
-
-            default:
-            System.Console.WriteLine("Invalid choice. Defaulting to Medium.");
-            attempts = 5;
-            return 10;
+                break;
         }
     }
+
+
+    
+    
 }
