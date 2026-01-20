@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "Nj+lFwidE7c=",
+  "success": true,
+  "projectFilePath": "/Users/jamesdunlop/Desktop/level up for hire/NET/C#/Comcepts/Practice/TextRpg/TextRpg.Api/TextRpg.Api.csproj",
+  "expectedPackageFiles": [
+    "/Users/jamesdunlop/.nuget/packages/microsoft.aspnetcore.openapi/9.0.9/microsoft.aspnetcore.openapi.9.0.9.nupkg.sha512",
+    "/Users/jamesdunlop/.nuget/packages/microsoft.openapi/1.6.17/microsoft.openapi.1.6.17.nupkg.sha512"
+  ],
+  "logs": []
+}
