@@ -1,0 +1,6 @@
+@TextRpg.Api_HostAddress = http://localhost:5283
+
+GET {{TextRpg.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
