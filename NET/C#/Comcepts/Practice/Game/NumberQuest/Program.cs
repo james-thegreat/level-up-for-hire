@@ -8,7 +8,8 @@ class Program
     static void Main()
     {
         Console.Title = "Number Qest (OOP)";
-        Game game = new Game();
+        IInput input = new ConsoleInput();
+        Game game = new Game(input);
         game.Start();
     }
 }

@@ -3,19 +3,22 @@ public class Game
 {
     private Random random;
     private Player player;
+    private IInput input;
 
     private int difficultyMultiplier;
     private int attempts;
+    
 
-    public Game()
+    public Game(IInput input)
     {
+        this.input = input;
         player = new Player();
         random = new Random();
-        ChooseDifficulty();
     }
 
     public void Start()
     {
+        ChooseDifficulty();
         bool playing = true;
 
         while (playing)
@@ -58,7 +61,7 @@ public class Game
             System.Console.WriteLine($"\nGuess the number (1 - {maxNumber})");
             System.Console.WriteLine($"Attempts left: {remainingAttempts}");
 
-            int guess = InputHelper.GetValidInt("Your guess: ");
+            int guess = input.GetInt("Your guess: ");
 
             if (guess == secretNumber)
             {
@@ -88,7 +91,7 @@ public class Game
         System.Console.WriteLine("2. Medium");
         System.Console.WriteLine("3. Hard");
 
-        int choice = InputHelper.GetValidInt("Choice: ");
+        int choice = input.GetInt("Choice: ");
 
         switch (choice)
         {
@@ -109,7 +112,17 @@ public class Game
         }
     }
 
+    // For Unit Testing
+    public bool PlaySingleLevelForTest(int secretNumber)
+    {
+        return PlayLevel(secretNumber, secretNumber);
+    }
 
+    public void SetDifficultyForTest(int difficultyMultiplier, int attempts)
+    {
+        this.difficultyMultiplier = difficultyMultiplier;
+        this.attempts = attempts;
+    }
     
     
 }
