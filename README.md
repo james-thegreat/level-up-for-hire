@@ -22,8 +22,13 @@
 
 ## .NET
 <p>
-  C#
-  <li>Practusing problems to get my head around C#'s syntax.</li>
-  API
+  ### C#
+  .NET/Projects
   <li>Creating a schedule app to practice API.</li>
+  C#/Concepts/Practice/PracticePlayground
+  <li>Practusing problems to get my head around C#'s syntax.</li>
+  C#/Concepts/Practice/Game
+  <li>Number Quest - a guessing game using random numbers.</li>
+  C#/Concepts/Practice/TextRpg
+  <li>A Text Based RPG to help me learn the skill to have a start to end development including API, database, & Frontend int React.js.</li>
 </p>
