@@ -21,9 +21,9 @@
 </p>
 
 ## .NET
+
+  ### C#
 <p>
-  ## C#
-  
   <u>.NET/Projects<u/>
   <li>Creating a schedule app to practice API.</li>
   <U>C#/Concepts/Practice/PracticePlayground<U/>
