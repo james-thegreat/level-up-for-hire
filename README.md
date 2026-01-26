@@ -26,10 +26,10 @@
   
   <u>.NET/Projects<u/>
   <li>Creating a schedule app to practice API.</li>
-  <u>C#/Concepts/Practice/PracticePlayground<u/>
+  <u> C#/Concepts/Practice/PracticePlayground <u/>
   <li>Practusing problems to get my head around C#'s syntax.</li>
-  <u>C#/Concepts/Practice/Game<u/>
+  <u> C#/Concepts/Practice/Game <u/>
   <li>Number Quest - a guessing game using random numbers.</li>
-  <u>C#/Concepts/Practice/TextRpg<u/>
+  <u> C#/Concepts/Practice/TextRpg <u/>
   <li>A Text Based RPG to help me learn the skill to have a start to end development including API, database, & Frontend int React.js.</li>
 </p>
