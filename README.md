@@ -22,7 +22,7 @@
 
 ## .NET
 <p>
-  ### C#
+  ## C#
   
   <u>.NET/Projects<u/>
   <li>Creating a schedule app to practice API.</li>
