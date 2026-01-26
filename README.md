@@ -26,7 +26,7 @@
   
   <u>.NET/Projects<u/>
   <li>Creating a schedule app to practice API.</li>
-  <u>C#/Concepts/Practice/PracticePlayground<u/>
+  <U>C#/Concepts/Practice/PracticePlayground<U/>
   <li>Practusing problems to get my head around C#'s syntax.</li>
   <u> C#/Concepts/Practice/Game <u/>
   <li>Number Quest - a guessing game using random numbers.</li>
