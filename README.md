@@ -24,12 +24,12 @@
 <p>
   ### C#
   
-  .NET/Projects
+  <u>.NET/Projects<u/>
   <li>Creating a schedule app to practice API.</li>
-  C#/Concepts/Practice/PracticePlayground
+  <u>C#/Concepts/Practice/PracticePlayground<u/>
   <li>Practusing problems to get my head around C#'s syntax.</li>
-  C#/Concepts/Practice/Game
+  <u>C#/Concepts/Practice/Game<u/>
   <li>Number Quest - a guessing game using random numbers.</li>
-  C#/Concepts/Practice/TextRpg
+  <u>C#/Concepts/Practice/TextRpg<u/>
   <li>A Text Based RPG to help me learn the skill to have a start to end development including API, database, & Frontend int React.js.</li>
 </p>
