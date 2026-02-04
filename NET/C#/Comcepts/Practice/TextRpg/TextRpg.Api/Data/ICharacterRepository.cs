@@ -6,6 +6,5 @@ public interface ICharacterRepository
 {
     Character Add(Character character);
     Character? GetById(Guid id);
-
-    void Update(CharactersStore character);
+    
 }

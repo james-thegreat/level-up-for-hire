@@ -18,9 +18,5 @@ public sealed class InMemoryCharacterRepository : ICharacterRepository
         _characters.TryGetValue(id, out var character);
         return character;
     }
-
-    public void Update(Character character)
-    {
-        _characters[character.Id] = character;
-    }
+    
 }
