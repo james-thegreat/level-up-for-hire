@@ -1,39 +1,55 @@
 using Microsoft.AspNetCore.Mvc;
 using TextRpg.Domain;
+using TextRpg.Api.Data;
 
 namespace TextRpg.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class CharactersController: CorntrollerBase
+public class CharactersController : ControllerBase
 {
-    // For now: in-memory storage (we'll replace later)
-    private static readonly Dictionary<Guid, Character> _characters = new();
+    private readonly ICharacterRepository _repository;
 
-    [HttpPosst]
-    public ActionResult<CharacterDto> Create([FromBody] CreateCharacterRequest)
+    public CharactersController(ICharacterRepository repository)
+    {
+        _repository = repository;
+    }
+
+    [HttpPost]
+    public ActionResult<CharacterDto> Create([FromBody] CreateCharacterRequest request)
     {
         var character = new Character(request.Name);
-        _characters[character.Id] = character;
+        _repository.Add(character);
 
-        return CharacterAtAction(nameof(GetById), new { id = character.Id }, CharacterDto.From(character));
+        return CreatedAtAction(
+            nameof(GetById),
+            new { id = character.Id },
+            CharacterDto.From(character));
     }
 
     [HttpGet("{id:guid}")]
     public ActionResult<CharacterDto> GetById(Guid id)
     {
-        if (!_characters.TryGetValue(id, out var character))
+        var character = _repository.GetById(id);
+        if (character is null)
         {
             return NotFound();
         }
 
-        return OK(CharacterDto.From(character));
+        return Ok(CharacterDto.From(character));
     }
 }
 
 public sealed record CreateCharacterRequest(string Name);
 
-public sealed record CharacterDto(Guid Id, string Name, intLevel, int MaxHp, int CurrentHp, int Attack, int Defense)
+public sealed record CharacterDto(
+    Guid Id,
+    string Name,
+    int Level,
+    int MaxHp,
+    int CurrentHp,
+    int Attack,
+    int Defense)
 {
     public static CharacterDto From(Character c) =>
         new(c.Id, c.Name, c.Level, c.MaxHp, c.CurrentHp, c.Attack, c.Defense);
