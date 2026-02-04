@@ -9,6 +9,7 @@ public sealed class Character
     public int CurrentHp { get; private set; } = 20;
     public int Attack { get; private set; } = 5;
     public int Defense {get; private set; } = 2;
+    public bool IsDead => CurrentHp <= 0;
 
     public Character(string name)
     {
