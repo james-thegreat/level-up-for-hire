@@ -138,6 +138,10 @@ async function createCharacter(e) {
         {character && (
           <div style={{ marginTop: 12 }}>
             <h3>Current Character</h3>
+            <p>
+              <strong>HP:</strong> {character.currentHp}/{character.maxHp}
+            </p>
+
             <pre style={{ background: "#f6f6f6", color: "#111", padding: 12, borderRadius: 8 }}>
               {JSON.stringify(character, null, 2)}
             </pre>

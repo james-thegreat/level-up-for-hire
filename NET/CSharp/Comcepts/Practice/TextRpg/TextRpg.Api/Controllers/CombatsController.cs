@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using Microsoft.AspNetCore.Mvc;
 using TextRpg.Api.Data;
 using TextRpg.Domain;
@@ -11,12 +12,10 @@ public class CombatsController : ControllerBase
     private readonly ICharacterRepository _characters;
     private readonly CombatService _combat;
 
-    // simple in-memory combat sessions
-    private static readonly Dictionary<Guid, Enemy> _enemies = new();
+    // ✅ Shared across all requests
+    private static readonly ConcurrentDictionary<Guid, Enemy> _enemies = new();
 
-    public CombatsController(
-        ICharacterRepository characters,
-        CombatService combat)
+    public CombatsController(ICharacterRepository characters, CombatService combat)
     {
         _characters = characters;
         _combat = combat;
@@ -28,25 +27,18 @@ public class CombatsController : ControllerBase
         var enemy = request.EnemyType?.ToLowerInvariant() switch
         {
             "goblin" => new Enemy("Goblin", maxHp: 10, attack: 4, defense: 0),
-            "slime"  => new Enemy("Slime", maxHp: 8, attack: 3, defense: 1),
-            _        => new Enemy("Training Dummy", maxHp: 12, attack: 2, defense: 2)
+            "slime" => new Enemy("Slime", maxHp: 8, attack: 3, defense: 1),
+            _ => new Enemy("Training Dummy", maxHp: 12, attack: 2, defense: 2)
         };
 
         var combatId = Guid.NewGuid();
         _enemies[combatId] = enemy;
 
-        return Ok(new StartCombatResponse(
-            combatId,
-            enemy.Name,
-            enemy.MaxHp,
-            enemy.CurrentHp
-        ));
+        return Ok(new StartCombatResponse(combatId, enemy.Name, enemy.MaxHp, enemy.CurrentHp));
     }
 
     [HttpPost("{combatId:guid}/attack")]
-    public ActionResult<AttackResponse> Attack(
-        Guid combatId,
-        [FromBody] AttackRequest request)
+    public ActionResult<AttackResponse> Attack(Guid combatId, [FromBody] AttackRequest request)
     {
         if (!_enemies.TryGetValue(combatId, out var enemy))
             return NotFound("Combat not found. Start a combat first.");
@@ -57,11 +49,9 @@ public class CombatsController : ControllerBase
 
         var result = _combat.Attack(character, enemy);
 
-        // character HP changed — persist it
-        _characters.Update(character);
-
+        // if fight ended, remove it
         if (result.EnemyDefeated || result.CharacterDefeated)
-            _enemies.Remove(combatId);
+            _enemies.TryRemove(combatId, out _);
 
         return Ok(new AttackResponse(
             result.DamageToEnemy,
@@ -74,19 +64,9 @@ public class CombatsController : ControllerBase
     }
 }
 
-/* ---------- DTOs (must exist) ---------- */
-
 public sealed record StartCombatRequest(string? EnemyType);
-
-public sealed record StartCombatResponse(
-    Guid CombatId,
-    string EnemyName,
-    int EnemyMaxHp,
-    int EnemyCurrentHp
-);
-
+public sealed record StartCombatResponse(Guid CombatId, string EnemyName, int EnemyMaxHp, int EnemyCurrentHp);
 public sealed record AttackRequest(Guid CharacterId);
-
 public sealed record AttackResponse(
     int DamageToEnemy,
     int DamageToCharacter,
