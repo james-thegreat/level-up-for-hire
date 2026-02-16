@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using Microsoft.AspNetCore.Mvc;
 using TextRpg.Api.Data;
 using TextRpg.Domain;
@@ -6,53 +7,88 @@ namespace TextRpg.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class CharactersController : ControllerBase
+public class CombatsController : ControllerBase
 {
-    private readonly ICharacterRepository _repository;
+    private readonly ICharacterRepository _characters;
+    private readonly CombatService _combat;
 
-    public CharactersController(ICharacterRepository repository)
+    private static readonly ConcurrentDictionary<Guid, Enemy> _enemies = new();
+
+    public CombatsController(
+        ICharacterRepository characters,
+        CombatService combat)
     {
-        _repository = repository;
+        _characters = characters;
+        _combat = combat;
     }
 
-    [HttpPost]
-    public ActionResult<CharacterDto> Create([FromBody] CreateCharacterRequest request)
+    [HttpPost("start")]
+    public ActionResult<StartCombatResponse> Start([FromBody] StartCombatRequest request)
     {
-        if (string.IsNullOrWhiteSpace(request.Name))
-            return BadRequest("Name is required.");
+        var enemy = request.EnemyType?.ToLowerInvariant() switch
+        {
+            "goblin" => new Enemy("Goblin", "/enemies/goblin.png", 10, 4, 0),
+            "slime"  => new Enemy("Slime", "/enemies/slime.png", 8, 3, 1),
+            _        => new Enemy("Training Dummy", "/enemies/dummy.png", 12, 2, 2)
+        };
 
-        var character = new Character(request.Name);
-        _repository.Add(character);
+        var combatId = Guid.NewGuid();
+        _enemies[combatId] = enemy;
 
-        return CreatedAtAction(
-            nameof(GetById),
-            new { id = character.Id },
-            CharacterDto.From(character)
-        );
+        return Ok(new StartCombatResponse(
+            combatId,
+            enemy.Name,
+            enemy.ImageUrl,
+            enemy.MaxHp,
+            enemy.CurrentHp
+        ));
     }
 
-    [HttpGet("{id:guid}")]
-    public ActionResult<CharacterDto> GetById(Guid id)
+    [HttpPost("{combatId:guid}/attack")]
+    public ActionResult<AttackResponse> Attack(Guid combatId, [FromBody] AttackRequest request)
     {
-        var character = _repository.GetById(id);
+        if (!_enemies.TryGetValue(combatId, out var enemy))
+            return NotFound("Combat not found.");
+
+        var character = _characters.GetById(request.CharacterId);
         if (character is null)
-            return NotFound();
+            return NotFound("Character not found.");
 
-        return Ok(CharacterDto.From(character));
+        var result = _combat.Attack(character, enemy);
+
+        if (result.EnemyDefeated || result.CharacterDefeated)
+            _enemies.TryRemove(combatId, out _);
+
+        return Ok(new AttackResponse(
+            result.DamageToEnemy,
+            result.DamageToCharacter,
+            result.CharacterHpAfter,
+            result.EnemyHpAfter,
+            enemy.ImageUrl,
+            result.EnemyDefeated,
+            result.CharacterDefeated
+        ));
     }
 }
 
-public sealed record CreateCharacterRequest(string Name);
+public sealed record StartCombatRequest(string? EnemyType);
 
-public sealed record CharacterDto(
-    Guid Id,
-    string Name,
-    int Level,
-    int MaxHp,
-    int CurrentHp,
-    int Attack,
-    int Defense)
-{
-    public static CharacterDto From(Character c) =>
-        new(c.Id, c.Name, c.Level, c.MaxHp, c.CurrentHp, c.Attack, c.Defense);
-}
+public sealed record StartCombatResponse(
+    Guid CombatId,
+    string EnemyName,
+    string ImageUrl,
+    int EnemyMaxHp,
+    int EnemyCurrentHp
+);
+
+public sealed record AttackRequest(Guid CharacterId);
+
+public sealed record AttackResponse(
+    int DamageToEnemy,
+    int DamageToCharacter,
+    int CharacterHpAfter,
+    int EnemyHpAfter,
+    string ImageUrl,
+    bool EnemyDefeated,
+    bool CharacterDefeated
+);

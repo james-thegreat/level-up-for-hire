@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "IJEmfAaL+k4=",
+  "dgSpecHash": "0SOsvaB+MnU=",
   "success": true,
-  "projectFilePath": "/Users/jamesdunlop/Desktop/level up for hire/NET/C#/Comcepts/Practice/TextRpg/TextRpg.Tests/TextRpg.Tests.csproj",
+  "projectFilePath": "/Users/jamesdunlop/Desktop/level up for hire/NET/CSharp/Comcepts/Practice/TextRpg/TextRpg.Tests/TextRpg.Tests.csproj",
   "expectedPackageFiles": [
     "/Users/jamesdunlop/.nuget/packages/coverlet.collector/6.0.2/coverlet.collector.6.0.2.nupkg.sha512",
     "/Users/jamesdunlop/.nuget/packages/microsoft.codecoverage/17.12.0/microsoft.codecoverage.17.12.0.nupkg.sha512",

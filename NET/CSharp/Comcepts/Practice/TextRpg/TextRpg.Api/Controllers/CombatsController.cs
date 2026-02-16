@@ -12,7 +12,7 @@ public class CombatsController : ControllerBase
     private readonly ICharacterRepository _characters;
     private readonly CombatService _combat;
 
-    // ✅ Shared across all requests
+    // Shared across all requests (simple in-memory combat sessions)
     private static readonly ConcurrentDictionary<Guid, Enemy> _enemies = new();
 
     public CombatsController(ICharacterRepository characters, CombatService combat)
@@ -26,15 +26,21 @@ public class CombatsController : ControllerBase
     {
         var enemy = request.EnemyType?.ToLowerInvariant() switch
         {
-            "goblin" => new Enemy("Goblin", maxHp: 10, attack: 4, defense: 0),
-            "slime" => new Enemy("Slime", maxHp: 8, attack: 3, defense: 1),
-            _ => new Enemy("Training Dummy", maxHp: 12, attack: 2, defense: 2)
+            "goblin" => new Enemy("Goblin", "/enemies/goblin.png", maxHp: 10, attack: 4, defense: 0),
+            "slime" => new Enemy("Slime", "/enemies/slime.png", maxHp: 8, attack: 3, defense: 1),
+            _ => new Enemy("Training Dummy", "/enemies/dummy.png", maxHp: 12, attack: 2, defense: 2)
         };
 
         var combatId = Guid.NewGuid();
         _enemies[combatId] = enemy;
 
-        return Ok(new StartCombatResponse(combatId, enemy.Name, enemy.MaxHp, enemy.CurrentHp));
+        return Ok(new StartCombatResponse(
+            combatId,
+            enemy.Name,
+            enemy.ImageUrl,
+            enemy.MaxHp,
+            enemy.CurrentHp
+        ));
     }
 
     [HttpPost("{combatId:guid}/attack")]
@@ -49,7 +55,7 @@ public class CombatsController : ControllerBase
 
         var result = _combat.Attack(character, enemy);
 
-        // if fight ended, remove it
+        // Remove combat session if finished
         if (result.EnemyDefeated || result.CharacterDefeated)
             _enemies.TryRemove(combatId, out _);
 
@@ -58,20 +64,33 @@ public class CombatsController : ControllerBase
             result.DamageToCharacter,
             result.CharacterHpAfter,
             result.EnemyHpAfter,
+            enemy.ImageUrl,
             result.EnemyDefeated,
             result.CharacterDefeated
         ));
     }
 }
 
+/* ---------- DTOs ---------- */
+
 public sealed record StartCombatRequest(string? EnemyType);
-public sealed record StartCombatResponse(Guid CombatId, string EnemyName, int EnemyMaxHp, int EnemyCurrentHp);
+
+public sealed record StartCombatResponse(
+    Guid CombatId,
+    string EnemyName,
+    string ImageUrl,
+    int EnemyMaxHp,
+    int EnemyCurrentHp
+);
+
 public sealed record AttackRequest(Guid CharacterId);
+
 public sealed record AttackResponse(
     int DamageToEnemy,
     int DamageToCharacter,
     int CharacterHpAfter,
     int EnemyHpAfter,
+    string ImageUrl,
     bool EnemyDefeated,
     bool CharacterDefeated
 );

@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/Users/jamesdunlop/Desktop/level up for hire/NET/C#/Comcepts/Practice/TextRpg/TextRpg.Tests/TextRpg.Tests.csproj": {}
+    "/Users/jamesdunlop/Desktop/level up for hire/NET/CSharp/Comcepts/Practice/TextRpg/TextRpg.Tests/TextRpg.Tests.csproj": {}
   },
   "projects": {
-    "/Users/jamesdunlop/Desktop/level up for hire/NET/C#/Comcepts/Practice/TextRpg/TextRpg.Domain/TextRpg.Domain.csproj": {
+    "/Users/jamesdunlop/Desktop/level up for hire/NET/CSharp/Comcepts/Practice/TextRpg/TextRpg.Domain/TextRpg.Domain.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/jamesdunlop/Desktop/level up for hire/NET/C#/Comcepts/Practice/TextRpg/TextRpg.Domain/TextRpg.Domain.csproj",
+        "projectUniqueName": "/Users/jamesdunlop/Desktop/level up for hire/NET/CSharp/Comcepts/Practice/TextRpg/TextRpg.Domain/TextRpg.Domain.csproj",
         "projectName": "TextRpg.Domain",
-        "projectPath": "/Users/jamesdunlop/Desktop/level up for hire/NET/C#/Comcepts/Practice/TextRpg/TextRpg.Domain/TextRpg.Domain.csproj",
+        "projectPath": "/Users/jamesdunlop/Desktop/level up for hire/NET/CSharp/Comcepts/Practice/TextRpg/TextRpg.Domain/TextRpg.Domain.csproj",
         "packagesPath": "/Users/jamesdunlop/.nuget/packages/",
-        "outputPath": "/Users/jamesdunlop/Desktop/level up for hire/NET/C#/Comcepts/Practice/TextRpg/TextRpg.Domain/obj/",
+        "outputPath": "/Users/jamesdunlop/Desktop/level up for hire/NET/CSharp/Comcepts/Practice/TextRpg/TextRpg.Domain/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/Users/jamesdunlop/.nuget/NuGet/NuGet.Config"
@@ -63,14 +63,14 @@
         }
       }
     },
-    "/Users/jamesdunlop/Desktop/level up for hire/NET/C#/Comcepts/Practice/TextRpg/TextRpg.Tests/TextRpg.Tests.csproj": {
+    "/Users/jamesdunlop/Desktop/level up for hire/NET/CSharp/Comcepts/Practice/TextRpg/TextRpg.Tests/TextRpg.Tests.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/jamesdunlop/Desktop/level up for hire/NET/C#/Comcepts/Practice/TextRpg/TextRpg.Tests/TextRpg.Tests.csproj",
+        "projectUniqueName": "/Users/jamesdunlop/Desktop/level up for hire/NET/CSharp/Comcepts/Practice/TextRpg/TextRpg.Tests/TextRpg.Tests.csproj",
         "projectName": "TextRpg.Tests",
-        "projectPath": "/Users/jamesdunlop/Desktop/level up for hire/NET/C#/Comcepts/Practice/TextRpg/TextRpg.Tests/TextRpg.Tests.csproj",
+        "projectPath": "/Users/jamesdunlop/Desktop/level up for hire/NET/CSharp/Comcepts/Practice/TextRpg/TextRpg.Tests/TextRpg.Tests.csproj",
         "packagesPath": "/Users/jamesdunlop/.nuget/packages/",
-        "outputPath": "/Users/jamesdunlop/Desktop/level up for hire/NET/C#/Comcepts/Practice/TextRpg/TextRpg.Tests/obj/",
+        "outputPath": "/Users/jamesdunlop/Desktop/level up for hire/NET/CSharp/Comcepts/Practice/TextRpg/TextRpg.Tests/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/Users/jamesdunlop/.nuget/NuGet/NuGet.Config"
@@ -85,8 +85,8 @@
           "net9.0": {
             "targetAlias": "net9.0",
             "projectReferences": {
-              "/Users/jamesdunlop/Desktop/level up for hire/NET/C#/Comcepts/Practice/TextRpg/TextRpg.Domain/TextRpg.Domain.csproj": {
-                "projectPath": "/Users/jamesdunlop/Desktop/level up for hire/NET/C#/Comcepts/Practice/TextRpg/TextRpg.Domain/TextRpg.Domain.csproj"
+              "/Users/jamesdunlop/Desktop/level up for hire/NET/CSharp/Comcepts/Practice/TextRpg/TextRpg.Domain/TextRpg.Domain.csproj": {
+                "projectPath": "/Users/jamesdunlop/Desktop/level up for hire/NET/CSharp/Comcepts/Practice/TextRpg/TextRpg.Domain/TextRpg.Domain.csproj"
               }
             }
           }

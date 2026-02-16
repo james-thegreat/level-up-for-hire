@@ -2,49 +2,98 @@ import { useState } from "react";
 
 const API_BASE = "http://localhost:5283";
 
+const heroImages = [
+  { name: "Knight", url: "/characters/Knight.png" },
+  { name: "Mage", url: "/characters/mage.png" },
+  { name: "Rogue", url: "/characters/rogue.png" },
+];
+
+const enemyImages = [
+  { type: "goblin", name: "Goblin", url: "/enemies/goblin.png" },
+  { type: "slime", name: "Slime", url: "/enemies/slime.png" },
+  { type: "dummy", name: "Training Dummy", url: "/enemies/dummy.png" }, // add this file or change url
+];
+
+const enemyImageByType = Object.fromEntries(enemyImages.map((e) => [e.type, e.url]));
+
+function normalizeImageUrl(url) {
+  if (!url) return null;
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  if (url.startsWith("/")) return url;
+  return `/${url}`;
+}
+
+/* ✅ Health bar must be OUTSIDE App */
+function HealthBar({ current, max, label = "HP" }) {
+  const safeMax = Math.max(1, Number(max ?? 1));
+  const safeCurrent = Math.max(0, Math.min(Number(current ?? 0), safeMax));
+  const pct = Math.round((safeCurrent / safeMax) * 100);
+
+  return (
+    <div style={{ width: 260 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+        <strong>{label}</strong>
+        <span>
+          {safeCurrent}/{safeMax} ({pct}%)
+        </span>
+      </div>
+
+      <div
+        style={{
+          height: 16,
+          background: "#eee",
+          borderRadius: 999,
+          overflow: "hidden",
+          border: "1px solid #ddd",
+        }}
+      >
+        <div
+          style={{
+            height: "100%",
+            width: `${pct}%`,
+            background: pct > 50 ? "#22c55e" : pct > 20 ? "#f59e0b" : "#ef4444",
+            transition: "width 200ms ease",
+          }}
+        />
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
-  // Character state
   const [name, setName] = useState("");
+  const [imageUrl, setImageUrl] = useState(heroImages[0].url);
   const [character, setCharacter] = useState(null);
 
-  // Combat state
   const [enemyType, setEnemyType] = useState("goblin");
   const [combatId, setCombatId] = useState(null);
   const [enemy, setEnemy] = useState(null);
 
-  // Combat result
   const [lastAttack, setLastAttack] = useState(null);
   const [error, setError] = useState("");
 
-async function createCharacter(e) {
-  e.preventDefault();
-  setError("");
-  setLastAttack(null);
+  async function createCharacter(e) {
+    e.preventDefault();
+    setError("");
+    setLastAttack(null);
 
-  try {
-    console.log("POST", `${API_BASE}/api/Characters`, { name });
+    try {
+      const res = await fetch(`${API_BASE}/api/Characters`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, imageUrl }),
+      });
 
-    const res = await fetch(`${API_BASE}/api/Characters`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name }),
-    });
+      const bodyText = await res.text();
+      if (!res.ok) throw new Error(`HTTP ${res.status}: ${bodyText || "(empty)"}`);
 
-    const bodyText = await res.text(); // read even on error
-    console.log("STATUS", res.status, "BODY", bodyText);
-
-    if (!res.ok) {
-      throw new Error(`HTTP ${res.status}: ${bodyText || "(empty response)"}`);
+      const data = JSON.parse(bodyText);
+      setCharacter(data);
+      setName("");
+    } catch (err) {
+      setError(String(err));
     }
-
-    const data = JSON.parse(bodyText);
-    setCharacter(data);
-    setName("");
-  } catch (err) {
-    setError(String(err));
   }
-}
-
 
   async function startCombat() {
     setError("");
@@ -57,26 +106,27 @@ async function createCharacter(e) {
         body: JSON.stringify({ enemyType }),
       });
 
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text || "Failed to start combat");
-      }
-
       const data = await res.json();
+
+      const apiUrl = data.imageUrl ?? data.enemyImageUrl ?? data.enemy?.imageUrl ?? null;
+      const finalUrl =
+        normalizeImageUrl(apiUrl) || enemyImageByType[enemyType] || "/enemies/unknown.png";
+
       setCombatId(data.combatId);
+
       setEnemy({
-        name: data.enemyName,
-        maxHp: data.enemyMaxHp,
-        currentHp: data.enemyCurrentHp,
+        name: data.enemyName ?? data.name ?? enemyType,
+        imageUrl: finalUrl,
+        maxHp: data.enemyMaxHp ?? data.maxHp,
+        currentHp: data.enemyCurrentHp ?? data.currentHp,
       });
     } catch (err) {
-      setError(err.message);
+      setError(err.message ?? String(err));
     }
   }
 
   async function attack() {
     if (!character || !combatId) return;
-
     setError("");
 
     try {
@@ -86,33 +136,21 @@ async function createCharacter(e) {
         body: JSON.stringify({ characterId: character.id }),
       });
 
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text || "Attack failed");
-      }
+      if (!res.ok) throw new Error((await res.text()) || "Attack failed");
 
       const data = await res.json();
       setLastAttack(data);
 
-      // Update enemy HP shown in UI
-      setEnemy((prev) =>
-        prev ? { ...prev, currentHp: data.enemyHpAfter } : prev
-      );
+      setEnemy((prev) => (prev ? { ...prev, currentHp: data.enemyHpAfter } : prev));
+      setCharacter((prev) => (prev ? { ...prev, currentHp: data.characterHpAfter } : prev));
 
-      // Fetch updated character from API so UI shows new HP
-      const chRes = await fetch(`${API_BASE}/api/Characters/${character.id}`);
-      const updatedCharacter = await chRes.json();
-      setCharacter(updatedCharacter);
-
-      // If fight ended, clear combat
-      if (data.enemyDefeated || data.characterDefeated) {
-        setCombatId(null);
-      }
+      if (data.enemyDefeated || data.characterDefeated) setCombatId(null);
     } catch (err) {
-      setError(err.message);
+      setError(err.message ?? String(err));
     }
   }
 
+  /* ✅ App return stays here */
   return (
     <div style={{ fontFamily: "system-ui", padding: 24, maxWidth: 800 }}>
       <h1>TextRPG UI (React)</h1>
@@ -123,32 +161,62 @@ async function createCharacter(e) {
         </div>
       )}
 
+      {/* CREATE CHARACTER */}
       <section style={{ marginTop: 24, padding: 16, border: "1px solid #ddd", borderRadius: 12 }}>
         <h2>Create Character</h2>
-        <form onSubmit={createCharacter} style={{ display: "flex", gap: 8 }}>
+
+        <form onSubmit={createCharacter} style={{ display: "flex", gap: 8, flexDirection: "column" }}>
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Character name"
-            style={{ flex: 1, padding: 8 }}
+            style={{ padding: 8 }}
           />
+
+          <img
+            src={imageUrl}
+            alt="preview"
+            style={{ width: 120, height: 120, objectFit: "cover", borderRadius: 12 }}
+            onError={() => console.log("Hero image failed:", imageUrl)}
+          />
+
+          <select value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} style={{ padding: 8 }}>
+            {heroImages.map((img) => (
+              <option key={img.url} value={img.url}>
+                {img.name}
+              </option>
+            ))}
+          </select>
+
           <button type="submit">Create</button>
         </form>
 
         {character && (
-          <div style={{ marginTop: 12 }}>
+          <div style={{ marginTop: 16 }}>
             <h3>Current Character</h3>
-            <p>
-              <strong>HP:</strong> {character.currentHp}/{character.maxHp}
-            </p>
 
-            <pre style={{ background: "#f6f6f6", color: "#111", padding: 12, borderRadius: 8 }}>
+            <img
+              src={character.imageUrl}
+              alt={character.name}
+              style={{ width: 120, height: 120, objectFit: "cover", borderRadius: 12, marginBottom: 8 }}
+              onError={() => console.log("Character image failed:", character.imageUrl)}
+            />
+
+            {/* ✅ HEALTH BAR HERE */}
+            <HealthBar
+              label={`${character.name} HP`}
+              current={character.currentHp}
+              max={character.maxHp}
+            />
+
+            <pre style={{ background: "#1e1e1e", color: "#e6e6e6", padding: 12, borderRadius: 8 }}>
               {JSON.stringify(character, null, 2)}
             </pre>
           </div>
         )}
       </section>
 
+      {/* COMBAT */}
       <section style={{ marginTop: 24, padding: 16, border: "1px solid #ddd", borderRadius: 12 }}>
         <h2>Combat</h2>
 
@@ -160,9 +228,11 @@ async function createCharacter(e) {
               onChange={(e) => setEnemyType(e.target.value)}
               style={{ marginLeft: 8, padding: 6 }}
             >
-              <option value="goblin">Goblin</option>
-              <option value="slime">Slime</option>
-              <option value="dummy">Training Dummy</option>
+              {enemyImages.map((e) => (
+                <option key={e.type} value={e.type}>
+                  {e.name}
+                </option>
+              ))}
             </select>
           </label>
 
@@ -175,23 +245,25 @@ async function createCharacter(e) {
           </button>
         </div>
 
-        {!character && <p style={{ marginTop: 12 }}>Create a character first.</p>}
+        {!character && <p>Create a character first.</p>}
 
         {enemy && (
           <div style={{ marginTop: 12 }}>
-            <strong>Enemy:</strong> {enemy.name} — HP {enemy.currentHp}/{enemy.maxHp}
-            {combatId && (
-              <div style={{ fontSize: 12, opacity: 0.7 }}>CombatId: {combatId}</div>
-            )}
+            <img
+              src={enemy.imageUrl}
+              alt={enemy.name}
+              style={{ width: 120, height: 120, objectFit: "cover", borderRadius: 12, marginBottom: 8 }}
+              onError={() => console.log("Enemy image failed:", enemy.imageUrl)}
+            />
+
+            {/* ✅ ENEMY HEALTH BAR */}
+            <HealthBar label={`${enemy.name} HP`} current={enemy.currentHp} max={enemy.maxHp} />
           </div>
         )}
 
         {lastAttack && (
           <div style={{ marginTop: 12 }}>
-            <h3>Last Attack Result</h3>
-            <pre style={{ background: "#f6f6f6", color: "#111", padding: 12, borderRadius: 8 }}>
-              {JSON.stringify(lastAttack, null, 2)}
-            </pre>
+            <p>You took {lastAttack.damageToCharacter} damage</p>
           </div>
         )}
       </section>
