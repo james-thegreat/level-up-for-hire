@@ -14,14 +14,50 @@ const enemyImages = [
   { type: "dummy", name: "Training Dummy", url: "/enemies/dummy.png" }, // add this file or change url
 ];
 
-const enemyImageByType = Object.fromEntries(enemyImages.map(e => [e.type, e.url]));
+const enemyImageByType = Object.fromEntries(enemyImages.map((e) => [e.type, e.url]));
 
 function normalizeImageUrl(url) {
   if (!url) return null;
-  // If API returns "enemies/goblin.png", fix it to "/enemies/goblin.png"
   if (url.startsWith("http://") || url.startsWith("https://")) return url;
   if (url.startsWith("/")) return url;
   return `/${url}`;
+}
+
+/* ✅ Health bar must be OUTSIDE App */
+function HealthBar({ current, max, label = "HP" }) {
+  const safeMax = Math.max(1, Number(max ?? 1));
+  const safeCurrent = Math.max(0, Math.min(Number(current ?? 0), safeMax));
+  const pct = Math.round((safeCurrent / safeMax) * 100);
+
+  return (
+    <div style={{ width: 260 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+        <strong>{label}</strong>
+        <span>
+          {safeCurrent}/{safeMax} ({pct}%)
+        </span>
+      </div>
+
+      <div
+        style={{
+          height: 16,
+          background: "#eee",
+          borderRadius: 999,
+          overflow: "hidden",
+          border: "1px solid #ddd",
+        }}
+      >
+        <div
+          style={{
+            height: "100%",
+            width: `${pct}%`,
+            background: pct > 50 ? "#22c55e" : pct > 20 ? "#f59e0b" : "#ef4444",
+            transition: "width 200ms ease",
+          }}
+        />
+      </div>
+    </div>
+  );
 }
 
 export default function App() {
@@ -72,10 +108,7 @@ export default function App() {
 
       const data = await res.json();
 
-      // ✅ Use API value if good, otherwise use local mapping by enemyType
-      const apiUrl =
-        data.imageUrl ?? data.enemyImageUrl ?? data.enemy?.imageUrl ?? null;
-
+      const apiUrl = data.imageUrl ?? data.enemyImageUrl ?? data.enemy?.imageUrl ?? null;
       const finalUrl =
         normalizeImageUrl(apiUrl) || enemyImageByType[enemyType] || "/enemies/unknown.png";
 
@@ -108,8 +141,8 @@ export default function App() {
       const data = await res.json();
       setLastAttack(data);
 
-      setEnemy(prev => (prev ? { ...prev, currentHp: data.enemyHpAfter } : prev));
-      setCharacter(prev => (prev ? { ...prev, currentHp: data.characterHpAfter } : prev));
+      setEnemy((prev) => (prev ? { ...prev, currentHp: data.enemyHpAfter } : prev));
+      setCharacter((prev) => (prev ? { ...prev, currentHp: data.characterHpAfter } : prev));
 
       if (data.enemyDefeated || data.characterDefeated) setCombatId(null);
     } catch (err) {
@@ -117,6 +150,7 @@ export default function App() {
     }
   }
 
+  /* ✅ App return stays here */
   return (
     <div style={{ fontFamily: "system-ui", padding: 24, maxWidth: 800 }}>
       <h1>TextRPG UI (React)</h1>
@@ -146,7 +180,6 @@ export default function App() {
             onError={() => console.log("Hero image failed:", imageUrl)}
           />
 
-          {/* ✅ ONLY HERO IMAGES HERE */}
           <select value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} style={{ padding: 8 }}>
             {heroImages.map((img) => (
               <option key={img.url} value={img.url}>
@@ -169,9 +202,12 @@ export default function App() {
               onError={() => console.log("Character image failed:", character.imageUrl)}
             />
 
-            <p>
-              <strong>HP:</strong> {character.currentHp}/{character.maxHp}
-            </p>
+            {/* ✅ HEALTH BAR HERE */}
+            <HealthBar
+              label={`${character.name} HP`}
+              current={character.currentHp}
+              max={character.maxHp}
+            />
 
             <pre style={{ background: "#1e1e1e", color: "#e6e6e6", padding: 12, borderRadius: 8 }}>
               {JSON.stringify(character, null, 2)}
@@ -220,7 +256,8 @@ export default function App() {
               onError={() => console.log("Enemy image failed:", enemy.imageUrl)}
             />
 
-            <strong>Enemy:</strong> {enemy.name} — HP {enemy.currentHp}/{enemy.maxHp}
+            {/* ✅ ENEMY HEALTH BAR */}
+            <HealthBar label={`${enemy.name} HP`} current={enemy.currentHp} max={enemy.maxHp} />
           </div>
         )}
 
