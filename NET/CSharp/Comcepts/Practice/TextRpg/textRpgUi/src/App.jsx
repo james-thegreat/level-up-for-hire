@@ -1,64 +1,8 @@
 import { useState } from "react";
-
-const API_BASE = "http://localhost:5283";
-
-const heroImages = [
-  { name: "Knight", url: "/characters/Knight.png" },
-  { name: "Mage", url: "/characters/mage.png" },
-  { name: "Rogue", url: "/characters/rogue.png" },
-];
-
-const enemyImages = [
-  { type: "goblin", name: "Goblin", url: "/enemies/goblin.png" },
-  { type: "slime", name: "Slime", url: "/enemies/slime.png" },
-  { type: "dummy", name: "Training Dummy", url: "/enemies/dummy.png" }, // add this file or change url
-];
-
-const enemyImageByType = Object.fromEntries(enemyImages.map((e) => [e.type, e.url]));
-
-function normalizeImageUrl(url) {
-  if (!url) return null;
-  if (url.startsWith("http://") || url.startsWith("https://")) return url;
-  if (url.startsWith("/")) return url;
-  return `/${url}`;
-}
-
-/* ✅ Health bar must be OUTSIDE App */
-function HealthBar({ current, max, label = "HP" }) {
-  const safeMax = Math.max(1, Number(max ?? 1));
-  const safeCurrent = Math.max(0, Math.min(Number(current ?? 0), safeMax));
-  const pct = Math.round((safeCurrent / safeMax) * 100);
-
-  return (
-    <div style={{ width: 260 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-        <strong>{label}</strong>
-        <span>
-          {safeCurrent}/{safeMax} ({pct}%)
-        </span>
-      </div>
-
-      <div
-        style={{
-          height: 16,
-          background: "#eee",
-          borderRadius: 999,
-          overflow: "hidden",
-          border: "1px solid #ddd",
-        }}
-      >
-        <div
-          style={{
-            height: "100%",
-            width: `${pct}%`,
-            background: pct > 50 ? "#22c55e" : pct > 20 ? "#f59e0b" : "#ef4444",
-            transition: "width 200ms ease",
-          }}
-        />
-      </div>
-    </div>
-  );
-}
+import { apiFetch } from "./api/http";
+import CharacterPanel from "./components/CharacterPanel";
+import CombatPanel from "./components/CombatPanel";
+import { heroImages, enemyImageByType, normalizeImageUrl } from "./data/images";
 
 export default function App() {
   const [name, setName] = useState("");
@@ -78,20 +22,15 @@ export default function App() {
     setLastAttack(null);
 
     try {
-      const res = await fetch(`${API_BASE}/api/Characters`, {
+      const data = await apiFetch("/api/Characters", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, imageUrl }),
       });
 
-      const bodyText = await res.text();
-      if (!res.ok) throw new Error(`HTTP ${res.status}: ${bodyText || "(empty)"}`);
-
-      const data = JSON.parse(bodyText);
       setCharacter(data);
       setName("");
     } catch (err) {
-      setError(String(err));
+      setError(err.message ?? String(err));
     }
   }
 
@@ -100,17 +39,13 @@ export default function App() {
     setLastAttack(null);
 
     try {
-      const res = await fetch(`${API_BASE}/api/combats/start`, {
+      const data = await apiFetch("/api/combats/start", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ enemyType }),
       });
 
-      const data = await res.json();
-
       const apiUrl = data.imageUrl ?? data.enemyImageUrl ?? data.enemy?.imageUrl ?? null;
-      const finalUrl =
-        normalizeImageUrl(apiUrl) || enemyImageByType[enemyType] || "/enemies/unknown.png";
+      const finalUrl = normalizeImageUrl(apiUrl) || enemyImageByType[enemyType] || "/images/enemies/dummy.png";
 
       setCombatId(data.combatId);
 
@@ -130,15 +65,11 @@ export default function App() {
     setError("");
 
     try {
-      const res = await fetch(`${API_BASE}/api/combats/${combatId}/attack`, {
+      const data = await apiFetch(`/api/combats/${combatId}/attack`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ characterId: character.id }),
       });
 
-      if (!res.ok) throw new Error((await res.text()) || "Attack failed");
-
-      const data = await res.json();
       setLastAttack(data);
 
       setEnemy((prev) => (prev ? { ...prev, currentHp: data.enemyHpAfter } : prev));
@@ -150,10 +81,9 @@ export default function App() {
     }
   }
 
-  /* ✅ App return stays here */
   return (
     <div style={{ fontFamily: "system-ui", padding: 24, maxWidth: 800 }}>
-      <h1>TextRPG UI (React)</h1>
+      <h1>TextRPG UI (Vite + React)</h1>
 
       {error && (
         <div style={{ background: "#fee", padding: 12, borderRadius: 8 }}>
@@ -161,112 +91,25 @@ export default function App() {
         </div>
       )}
 
-      {/* CREATE CHARACTER */}
-      <section style={{ marginTop: 24, padding: 16, border: "1px solid #ddd", borderRadius: 12 }}>
-        <h2>Create Character</h2>
+      <CharacterPanel
+        name={name}
+        setName={setName}
+        imageUrl={imageUrl}
+        setImageUrl={setImageUrl}
+        character={character}
+        onCreate={createCharacter}
+      />
 
-        <form onSubmit={createCharacter} style={{ display: "flex", gap: 8, flexDirection: "column" }}>
-          <input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Character name"
-            style={{ padding: 8 }}
-          />
-
-          <img
-            src={imageUrl}
-            alt="preview"
-            style={{ width: 120, height: 120, objectFit: "cover", borderRadius: 12 }}
-            onError={() => console.log("Hero image failed:", imageUrl)}
-          />
-
-          <select value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} style={{ padding: 8 }}>
-            {heroImages.map((img) => (
-              <option key={img.url} value={img.url}>
-                {img.name}
-              </option>
-            ))}
-          </select>
-
-          <button type="submit">Create</button>
-        </form>
-
-        {character && (
-          <div style={{ marginTop: 16 }}>
-            <h3>Current Character</h3>
-
-            <img
-              src={character.imageUrl}
-              alt={character.name}
-              style={{ width: 120, height: 120, objectFit: "cover", borderRadius: 12, marginBottom: 8 }}
-              onError={() => console.log("Character image failed:", character.imageUrl)}
-            />
-
-            {/* ✅ HEALTH BAR HERE */}
-            <HealthBar
-              label={`${character.name} HP`}
-              current={character.currentHp}
-              max={character.maxHp}
-            />
-
-            <pre style={{ background: "#1e1e1e", color: "#e6e6e6", padding: 12, borderRadius: 8 }}>
-              {JSON.stringify(character, null, 2)}
-            </pre>
-          </div>
-        )}
-      </section>
-
-      {/* COMBAT */}
-      <section style={{ marginTop: 24, padding: 16, border: "1px solid #ddd", borderRadius: 12 }}>
-        <h2>Combat</h2>
-
-        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          <label>
-            Enemy:
-            <select
-              value={enemyType}
-              onChange={(e) => setEnemyType(e.target.value)}
-              style={{ marginLeft: 8, padding: 6 }}
-            >
-              {enemyImages.map((e) => (
-                <option key={e.type} value={e.type}>
-                  {e.name}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <button onClick={startCombat} disabled={!character}>
-            Start Combat
-          </button>
-
-          <button onClick={attack} disabled={!character || !enemy || !combatId}>
-            Attack
-          </button>
-        </div>
-
-        {!character && <p>Create a character first.</p>}
-
-        {enemy && (
-          <div style={{ marginTop: 12 }}>
-            <img
-              src={enemy.imageUrl}
-              alt={enemy.name}
-              style={{ width: 120, height: 120, objectFit: "cover", borderRadius: 12, marginBottom: 8 }}
-              onError={() => console.log("Enemy image failed:", enemy.imageUrl)}
-            />
-
-            {/* ✅ ENEMY HEALTH BAR */}
-            <HealthBar label={`${enemy.name} HP`} current={enemy.currentHp} max={enemy.maxHp} />
-          </div>
-        )}
-
-        {lastAttack && (
-          <div style={{ marginTop: 12 }}>
-            <p>You took {lastAttack.damageToCharacter} damage</p>
-          </div>
-        )}
-      </section>
+      <CombatPanel
+        character={character}
+        enemyType={enemyType}
+        setEnemyType={setEnemyType}
+        enemy={enemy}
+        combatId={combatId}
+        lastAttack={lastAttack}
+        onStartCombat={startCombat}
+        onAttack={attack}
+      />
     </div>
   );
 }
